@@ -137,9 +137,18 @@ def predict(interpreter, img_array):
     return output[0]  # shape: (9,)
 
 
+def remove_background(image: Image.Image) -> Image.Image:
+    from rembg import remove
+    result = remove(image.convert("RGB"))
+    background = Image.new("RGB", result.size, (255, 255, 255))
+    background.paste(result, mask=result.split()[3])
+    return background
+
+
 def preprocess_image(image: Image.Image) -> np.ndarray:
-    """Resize, normalize, add batch dim."""
-    img = image.convert("RGB").resize(IMG_SIZE)
+    """Remove background, resize, normalize, add batch dim."""
+    img = remove_background(image)
+    img = img.resize(IMG_SIZE)
     arr = np.array(img, dtype=np.float32) / 255.0
     return np.expand_dims(arr, axis=0)  # (1, 224, 224, 3)
 
@@ -186,8 +195,9 @@ if uploaded_file:
         note = " *(placeholder)*"
     else:
         # ── Real model inference ───────────────────────────────────────────────
-        img_array = preprocess_image(image)
-        probs = predict(interpreter, img_array)
+        with st.spinner("Analyzing..."):
+            img_array = preprocess_image(image)
+            probs = predict(interpreter, img_array)
         top_idx = int(np.argmax(probs))
         top_conf = float(probs[top_idx])
         predicted_class = CLASS_NAMES[top_idx]
@@ -208,6 +218,6 @@ if uploaded_file:
     # Subtle footnote
     st.markdown(
         f"<p style='text-align:center; color:#94a3b8; font-size:0.78rem; margin-top:1rem;'>"
-        f"Model: EfficientNetB0 · 9 classes · 224×224 input</p>",
+        f"Model: ResNet50V2 · 9 classes · 224×224 input</p>",
         unsafe_allow_html=True,
     )
