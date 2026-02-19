@@ -16,7 +16,7 @@ st.markdown("""
 
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
-    background-color: #edeae3 !important;
+    background-color: #c8c4ba !important;
     color: #1a1a1a;
 }
 
@@ -24,7 +24,7 @@ html, body, [class*="css"] {
 .stApp, .stApp > div, section[data-testid="stSidebar"],
 div[data-testid="stAppViewContainer"],
 div[data-testid="stHeader"] {
-    background-color: #f7f4ef !important;
+    background-color: #c8c4ba !important;
 }
 
 div[data-testid="stFileUploadDropzone"],
@@ -129,7 +129,7 @@ div[data-testid="stFileUploadDropzone"],
 
 /* Model info card */
 .model-card {
-    background: #1a1a1a;
+    background: #bfbbb1;
     border-radius: 8px;
     padding: 1.2rem 1.5rem;
     margin-top: 2rem;
@@ -140,21 +140,21 @@ div[data-testid="stFileUploadDropzone"],
     justify-content: space-between;
     align-items: center;
     padding: 0.4rem 0;
-    border-bottom: 1px solid #2a2a2a;
+    border-bottom: 1px solid #b0aca2;
 }
 
 .model-card-row:last-child { border-bottom: none; }
 
 .model-card-key {
     font-size: 0.65rem;
-    color: #555;
+    color: #888;
     letter-spacing: 0.1em;
     text-transform: uppercase;
 }
 
 .model-card-val {
     font-size: 0.72rem;
-    color: #ccc;
+    color: #333;
     font-weight: 500;
 }
 
@@ -286,7 +286,7 @@ div[data-testid="stImage"] img {
 
 #MainMenu, footer, header { visibility: hidden; }
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #f7f4ef; }
+::-webkit-scrollbar-track { background: #c8c4ba; }
 ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
 </style>
 """, unsafe_allow_html=True)
@@ -464,4 +464,3 @@ st.markdown("""
     <span>ResNet50V2 · TFLite INT8 · 9 species</span>
 </div>
 """, unsafe_allow_html=True)
-
