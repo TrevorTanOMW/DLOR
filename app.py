@@ -111,20 +111,15 @@ IMG_SIZE = (224, 224)
 # ── Model loader ──────────────────────────────────────────────────────────────
 @st.cache_resource
 def load_model():
-    """
-    Load TFLite model.
-    Swap MODEL_PATH to your actual .tflite file when ready.
-    """
-    MODEL_PATH = "model.tflite"  # ← replace with your model path
+    MODEL_PATH = "model.tflite"
 
     if not os.path.exists(MODEL_PATH):
-        return None  # placeholder mode
+        return None
 
-    import tensorflow as tf
-    interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
+    import tflite_runtime.interpreter as tflite
+    interpreter = tflite.Interpreter(model_path=MODEL_PATH)
     interpreter.allocate_tensors()
     return interpreter
-
 
 def predict(interpreter, img_array):
     """Run inference with TFLite interpreter."""
@@ -221,3 +216,4 @@ if uploaded_file:
         f"Model: ResNet50V2 · 9 classes · 224×224 input</p>",
         unsafe_allow_html=True,
     )
+
