@@ -116,11 +116,11 @@ def load_model():
     if not os.path.exists(MODEL_PATH):
         return None
 
-    import tflite_runtime.interpreter as tflite
-    interpreter = tflite.Interpreter(model_path=MODEL_PATH)
+    import tensorflow as tf
+    interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
     interpreter.allocate_tensors()
     return interpreter
-
+    
 def predict(interpreter, img_array):
     """Run inference with TFLite interpreter."""
     input_details = interpreter.get_input_details()
@@ -216,4 +216,5 @@ if uploaded_file:
         f"Model: ResNet50V2 · 9 classes · 224×224 input</p>",
         unsafe_allow_html=True,
     )
+
 
