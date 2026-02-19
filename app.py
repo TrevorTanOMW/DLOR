@@ -16,7 +16,7 @@ st.markdown("""
 
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
-    background-color: #f7f4ef !important;
+    background-color: #edeae3 !important;
     color: #1a1a1a;
 }
 
@@ -464,3 +464,4 @@ st.markdown("""
     <span>ResNet50V2 · TFLite INT8 · 9 species</span>
 </div>
 """, unsafe_allow_html=True)
+
