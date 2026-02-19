@@ -311,34 +311,25 @@ if uploaded_file:
     <div class="result-panel">
         <div class="result-label">Identified Species</div>
         <div class="result-species">{predicted_class}{mode_note}</div>
-
         <div class="result-confidence-row">
             <span class="result-conf-num">{conf_pct:.1f}%</span>
             <div class="conf-track">
                 <div class="conf-fill" style="width:{int(conf_pct)}%;"></div>
             </div>
         </div>
-
-        <div class="meta-row">
-            <div>
-                <div class="meta-key">Inference Time</div>
-                <div class="meta-val">{inference_ms} ms</div>
-            </div>
-            <div>
-                <div class="meta-key">Input Size</div>
-                <div class="meta-val">224 × 224 px</div>
-            </div>
-            <div>
-                <div class="meta-key">Preprocessing</div>
-                <div class="meta-val">BG removal + normalize</div>
-            </div>
-            <div>
-                <div class="meta-key">Confidence</div>
-                <div class="meta-val">{conf_pct:.2f}%</div>
-            </div>
-        </div>
     </div>
     """, unsafe_allow_html=True)
+
+    st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Inference Time", f"{inference_ms} ms")
+    with col2:
+        st.metric("Input Size", "224×224 px")
+    with col3:
+        st.metric("Preprocessing", "BG + norm")
+    with col4:
+        st.metric("Confidence", f"{conf_pct:.2f}%")
 
 st.markdown("""
 <div class="footer">
