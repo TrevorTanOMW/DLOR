@@ -16,7 +16,7 @@ st.markdown("""
 
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
-    background-color: #c8c4ba !important;
+    background-color: #e8e4db !important;
     color: #1a1a1a;
 }
 
@@ -24,7 +24,7 @@ html, body, [class*="css"] {
 .stApp, .stApp > div, section[data-testid="stSidebar"],
 div[data-testid="stAppViewContainer"],
 div[data-testid="stHeader"] {
-    background-color: #c8c4ba !important;
+    background-color: #e8e4db !important;
 }
 
 div[data-testid="stFileUploadDropzone"],
@@ -129,7 +129,7 @@ div[data-testid="stFileUploadDropzone"],
 
 /* Model info card */
 .model-card {
-    background: #bfbbb1;
+    background: #d8d4cb;
     border-radius: 8px;
     padding: 1.2rem 1.5rem;
     margin-top: 2rem;
@@ -140,7 +140,7 @@ div[data-testid="stFileUploadDropzone"],
     justify-content: space-between;
     align-items: center;
     padding: 0.4rem 0;
-    border-bottom: 1px solid #b0aca2;
+    border-bottom: 1px solid #ccc8bf;
 }
 
 .model-card-row:last-child { border-bottom: none; }
@@ -286,7 +286,7 @@ div[data-testid="stImage"] img {
 
 #MainMenu, footer, header { visibility: hidden; }
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #c8c4ba; }
+::-webkit-scrollbar-track { background: #e8e4db; }
 ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
 </style>
 """, unsafe_allow_html=True)
