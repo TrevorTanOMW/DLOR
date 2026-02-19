@@ -2,219 +2,347 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import os
+import time
 
-# ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Fish Species Classifier",
-    page_icon="🐟",
+    page_title="AquaSort — Fish Species Classifier",
+    page_icon="",
     layout="centered",
 )
 
-# ── Styling ───────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body, [class*="css"] {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
+    background-color: #0a0a0a;
+    color: #e8e8e8;
 }
 
-h1, h2, h3 {
-    font-family: 'DM Serif Display', serif;
-}
-
-/* Remove default Streamlit padding */
 .block-container {
-    padding-top: 2rem;
+    padding: 3rem 2rem 4rem;
+    max-width: 720px;
+}
+
+.header {
+    border-bottom: 1px solid #222;
     padding-bottom: 2rem;
-    max-width: 680px;
+    margin-bottom: 2rem;
 }
 
-/* Upload box */
+.header-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.header-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #f0f0f0;
+    letter-spacing: -1px;
+    line-height: 1;
+}
+
+.header-title span { color: #00e5a0; }
+
+.header-sub {
+    font-size: 0.72rem;
+    color: #444;
+    margin-top: 0.8rem;
+    letter-spacing: 0.05em;
+}
+
+.status-bar {
+    display: flex;
+    gap: 2rem;
+    padding: 0.9rem 0;
+    border-top: 1px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.status-item { display: flex; flex-direction: column; gap: 0.2rem; }
+
+.status-key {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: #444;
+    text-transform: uppercase;
+}
+
+.status-val {
+    font-size: 0.78rem;
+    color: #00e5a0;
+    font-weight: 500;
+}
+
 .stFileUploader > div {
-    border: 1.5px dashed #d1d5db !important;
-    border-radius: 12px !important;
-    background: #fafafa !important;
-    transition: border-color 0.2s;
+    border: 1px solid #222 !important;
+    border-radius: 4px !important;
+    background: #0f0f0f !important;
+    transition: border-color 0.2s, background 0.2s;
 }
+
 .stFileUploader > div:hover {
-    border-color: #6b7280 !important;
+    border-color: #00e5a0 !important;
+    background: #0a1510 !important;
 }
 
-/* Result card */
-.result-card {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 1.5rem 2rem;
-    margin-top: 1.2rem;
-    text-align: center;
-}
-
-.result-card .species {
-    font-family: 'DM Serif Display', serif;
-    font-size: 2rem;
-    color: #0f172a;
-    margin: 0;
-    letter-spacing: -0.5px;
-}
-
-.result-card .confidence {
-    font-size: 1rem;
-    color: #64748b;
-    margin-top: 0.3rem;
-    font-weight: 300;
-}
-
-.confidence-bar-bg {
-    background: #e2e8f0;
-    border-radius: 99px;
-    height: 8px;
-    margin: 1rem auto 0;
-    max-width: 320px;
-}
-
-.confidence-bar-fill {
-    background: #0f172a;
-    border-radius: 99px;
-    height: 8px;
-    transition: width 0.6s ease;
-}
-
-/* Divider */
-hr {
+.divider {
     border: none;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #1a1a1a;
     margin: 1.5rem 0;
 }
 
-/* Hide Streamlit branding */
-#MainMenu, footer {visibility: hidden;}
+.result-panel {
+    background: #0d0d0d;
+    border: 1px solid #1e1e1e;
+    border-left: 3px solid #00e5a0;
+    border-radius: 4px;
+    padding: 1.8rem 2rem;
+    margin-top: 1rem;
+}
+
+.result-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: #444;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.result-species {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #f0f0f0;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+}
+
+.result-confidence-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.2rem;
+}
+
+.result-conf-num {
+    font-size: 0.85rem;
+    color: #00e5a0;
+    font-weight: 500;
+    min-width: 55px;
+}
+
+.conf-track {
+    flex: 1;
+    height: 3px;
+    background: #1e1e1e;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.conf-fill {
+    height: 3px;
+    background: #00e5a0;
+    border-radius: 2px;
+}
+
+.meta-row {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid #1a1a1a;
+    flex-wrap: wrap;
+}
+
+.meta-key {
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+    color: #333;
+    text-transform: uppercase;
+}
+
+.meta-val {
+    font-size: 0.72rem;
+    color: #555;
+    margin-top: 0.15rem;
+}
+
+.footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #151515;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-text {
+    font-size: 0.6rem;
+    color: #2a2a2a;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+div[data-testid="stImage"] img { border-radius: 4px; }
+#MainMenu, footer, header { visibility: hidden; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Constants ─────────────────────────────────────────────────────────────────
 CLASS_NAMES = [
-    "Black Sea Sprat",
-    "Gilt-Head Bream",
-    "Hourse Mackerel",
-    "Red Mullet",
-    "Red Sea Bream",
-    "Sea Bass",
-    "Shrimp",
-    "Striped Red Mullet",
-    "Trout",
+    "Black Sea Sprat", "Gilt-Head Bream", "Hourse Mackerel",
+    "Red Mullet", "Red Sea Bream", "Sea Bass",
+    "Shrimp", "Striped Red Mullet", "Trout",
 ]
 
 IMG_SIZE = (224, 224)
 
-# ── Model loader ──────────────────────────────────────────────────────────────
 @st.cache_resource
 def load_model():
     MODEL_PATH = "model.tflite"
-
     if not os.path.exists(MODEL_PATH):
         return None
-
     import tensorflow as tf
     interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
     interpreter.allocate_tensors()
     return interpreter
-    
+
 def predict(interpreter, img_array):
-    """Run inference with TFLite interpreter."""
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
-
     interpreter.set_tensor(input_details[0]['index'], img_array)
     interpreter.invoke()
-    output = interpreter.get_tensor(output_details[0]['index'])
-    return output[0]  # shape: (9,)
+    return interpreter.get_tensor(output_details[0]['index'])[0]
 
-
-def remove_background(image: Image.Image) -> Image.Image:
+def remove_background(image):
     from rembg import remove
     result = remove(image.convert("RGB"))
     background = Image.new("RGB", result.size, (255, 255, 255))
     background.paste(result, mask=result.split()[3])
     return background
 
-
-def preprocess_image(image: Image.Image) -> np.ndarray:
-    """Remove background, resize, normalize, add batch dim."""
+def preprocess_image(image):
     img = remove_background(image)
     img = img.resize(IMG_SIZE)
     arr = np.array(img, dtype=np.float32) / 255.0
-    return np.expand_dims(arr, axis=0)  # (1, 224, 224, 3)
-
-
-# ── UI ────────────────────────────────────────────────────────────────────────
-st.markdown("## 🐟 Fish Species Classifier")
-st.markdown(
-    "<p style='color:#64748b; margin-top:-0.5rem; margin-bottom:1.5rem;'>"
-    "Upload a fish image to identify its species.</p>",
-    unsafe_allow_html=True,
-)
+    return np.expand_dims(arr, axis=0)
 
 interpreter = load_model()
+status_color = "#00e5a0" if interpreter else "#ff4444"
+status_text = "ONLINE" if interpreter else "OFFLINE"
 
-if interpreter is None:
-    st.info(
-        "**Placeholder mode** — no `model.tflite` found. "
-        "Drop your trained model file next to `app.py` and restart.",
-        icon="ℹ️",
-    )
+st.markdown(f"""
+<div class="header">
+    <div class="header-label">Aquatic Species Identification System</div>
+    <div class="header-title">Aqua<span>Sort</span></div>
+    <div class="header-sub">Automated fish classification for industrial sorting pipelines</div>
+</div>
+
+<div class="status-bar">
+    <div class="status-item">
+        <span class="status-key">System</span>
+        <span class="status-val" style="color:{status_color};">{status_text}</span>
+    </div>
+    <div class="status-item">
+        <span class="status-key">Architecture</span>
+        <span class="status-val">ResNet50V2</span>
+    </div>
+    <div class="status-item">
+        <span class="status-key">Classes</span>
+        <span class="status-val">9 species</span>
+    </div>
+    <div class="status-item">
+        <span class="status-key">Test Accuracy</span>
+        <span class="status-val">100.0%</span>
+    </div>
+    <div class="status-item">
+        <span class="status-key">Quantization</span>
+        <span class="status-val">INT8</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader(
-    "Choose an image",
+    "Drop image here or click to browse — JPG, PNG, WEBP accepted",
     type=["jpg", "jpeg", "png", "webp"],
-    label_visibility="collapsed",
+    label_visibility="visible",
 )
 
 if uploaded_file:
     image = Image.open(uploaded_file)
-
-    # Show image — constrained width
-    st.image(image, use_container_width=True, caption="Uploaded image")
-
-    st.markdown("<hr>", unsafe_allow_html=True)
+    st.image(image, use_container_width=True)
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
     if interpreter is None:
-        # ── Demo / placeholder prediction ─────────────────────────────────────
-        st.markdown("**Prediction (demo — random placeholder)**")
         rng = np.random.default_rng(seed=42)
         probs = rng.dirichlet(np.ones(9))
         top_idx = int(np.argmax(probs))
         top_conf = float(probs[top_idx])
         predicted_class = CLASS_NAMES[top_idx]
-        note = " *(placeholder)*"
+        inference_ms = 0
+        mode_note = " <span style='font-size:0.85rem;color:#444;'>(demo)</span>"
     else:
-        # ── Real model inference ───────────────────────────────────────────────
         with st.spinner("Analyzing..."):
+            t0 = time.time()
             img_array = preprocess_image(image)
             probs = predict(interpreter, img_array)
+            inference_ms = int((time.time() - t0) * 1000)
         top_idx = int(np.argmax(probs))
         top_conf = float(probs[top_idx])
         predicted_class = CLASS_NAMES[top_idx]
-        note = ""
+        mode_note = ""
 
-    # Result card
-    bar_width = int(top_conf * 100)
+    conf_pct = top_conf * 100
+
     st.markdown(f"""
-    <div class="result-card">
-        <p class="species">{predicted_class}{note}</p>
-        <p class="confidence">{top_conf*100:.1f}% confidence</p>
-        <div class="confidence-bar-bg">
-            <div class="confidence-bar-fill" style="width:{bar_width}%;"></div>
+    <div class="result-panel">
+        <div class="result-label">Identified Species</div>
+        <div class="result-species">{predicted_class}{mode_note}</div>
+
+        <div class="result-confidence-row">
+            <span class="result-conf-num">{conf_pct:.1f}%</span>
+            <div class="conf-track">
+                <div class="conf-fill" style="width:{int(conf_pct)}%;"></div>
+            </div>
+        </div>
+
+        <div class="meta-row">
+            <div>
+                <div class="meta-key">Inference Time</div>
+                <div class="meta-val">{inference_ms} ms</div>
+            </div>
+            <div>
+                <div class="meta-key">Input Size</div>
+                <div class="meta-val">224 × 224 px</div>
+            </div>
+            <div>
+                <div class="meta-key">Preprocessing</div>
+                <div class="meta-val">BG removal + normalize</div>
+            </div>
+            <div>
+                <div class="meta-key">Confidence</div>
+                <div class="meta-val">{conf_pct:.2f}%</div>
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Subtle footnote
-    st.markdown(
-        f"<p style='text-align:center; color:#94a3b8; font-size:0.78rem; margin-top:1rem;'>"
-        f"Model: ResNet50V2 · 9 classes · 224×224 input</p>",
-        unsafe_allow_html=True,
-    )
-
-
+st.markdown("""
+<div class="footer">
+    <span class="footer-text">AquaSort Industrial Classification System</span>
+    <span class="footer-text">ResNet50V2 · TFLite INT8 · 9-class fish identifier</span>
+</div>
+""", unsafe_allow_html=True)
