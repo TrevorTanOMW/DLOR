@@ -16,8 +16,20 @@ st.markdown("""
 
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
-    background-color: #f7f4ef;
+    background-color: #f7f4ef !important;
     color: #1a1a1a;
+}
+
+/* Force light background everywhere */
+.stApp, .stApp > div, section[data-testid="stSidebar"],
+div[data-testid="stAppViewContainer"],
+div[data-testid="stHeader"] {
+    background-color: #f7f4ef !important;
+}
+
+div[data-testid="stFileUploadDropzone"],
+.stFileUploader {
+    background-color: #ffffff !important;
 }
 
 .block-container {
